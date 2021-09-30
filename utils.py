@@ -132,7 +132,7 @@ def plot_sorted_predictions(y_predict, y_true, y_scaler, color, dataset, output,
     plt.plot(pred_dict_df_sorted['mu'].values, color + 'o', label='ML predictions', markersize=1)
     plt.plot(pred_dict_df_sorted['label'].values, 'ko', label='PAIR simulations', markersize=1)
     if show_error_bars:
-        plt.fill_between(np.arange(len(y_predict_mu[:,0])), pred_dict_df_sorted['low'].values, pred_dict_df_sorted['up'].values, alpha=0.4, color=color)
+        plt.fill_between(np.arange(len(y_predict_mu[:,0])), pred_dict_df_sorted['low'].values, pred_dict_df_sorted['up'].values, alpha=0.4, color=color, label='Error bars')
     plt.grid(True)
     plt.title('Predictions on the ' + dataset)
     plt.legend(loc='upper left')
