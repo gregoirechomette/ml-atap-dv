@@ -22,28 +22,17 @@ from tensorflow.keras.callbacks import EarlyStopping
 '''====================== Parent class, for all types of neural networks ======================'''
 class GeneralNN:
 
-    def __init__(self, inputs, outputs, Ntrain, Nval, Ntest, Nfolds,
-                 learningrate, regularizer, batchsize, epochs, patience, verbosity,
-                 crossval, hyperparam_optimization, lrs, regs, 
-                 inputfile, outputfolder):
+    def __init__(self, learningrate, regularizer, batchsize, epochs, patience, 
+                    verbosity, Nfolds, crossval, outputfolder):
       
-        self.inputs = inputs
-        self.outputs = outputs
-        self.N_train = Ntrain
-        self.N_val = Nval
-        self.N_test = Ntest
-        self.N_xval_folds = Nfolds
         self.lr = learningrate
         self.reg = regularizer
-        self.batchSize = batchsize
-        self.maxit = epochs
+        self.batchsize = batchsize
+        self.epochs = epochs
         self.patience = patience
         self.verbosity = verbosity
+        self.Nfolds = Nfolds
         self.crossval = crossval
-        self.hyperparam_optimization = hyperparam_optimization
-        self.learning_rates = lrs
-        self.lambdas = regs
-        self.csv_name = inputfile
         self.outputfolder = outputfolder
 
     
@@ -67,23 +56,11 @@ class GeneralNN:
 '''====================== Class related to FCNN with multiple outputs ======================'''
 class FCNN_multi_outputs(GeneralNN):
 
-    def __init__(self, inputs, outputs, Ntrain, Nval, Ntest, Nfolds,
-                 learningrate, regularizer, batchsize, epochs, patience, verbosity, 
-                 crossval, hyperparam_optimization, lrs, regs, 
-                 inputfile, outputfolder):
+    def __init__(self, learningrate, regularizer, batchsize, epochs, patience, 
+                    verbosity, Nfolds, crossval, outputfolder):
                  
-        GeneralNN.__init__(self, inputs, outputs, Ntrain, Nval, Ntest, Nfolds,
-                 learningrate, regularizer, batchsize, epochs, patience, verbosity,
-                 crossval, hyperparam_optimization, lrs, regs, 
-                 inputfile, outputfolder)
-        self.csv_name = inputfile
-        self.inputs = inputs
-        self.outputs = outputs
-        self.maxit = epochs
-        self.batchSize = batchsize
-        self.patience = patience
-        self.verbosity = verbosity
-
+        GeneralNN.__init__(self, learningrate, regularizer, batchsize, epochs, patience, 
+                            verbosity, Nfolds, crossval, outputfolder)
 
     ''' 
         Creates the NN, given the design, activation function, regularization and learning rate.
@@ -134,8 +111,8 @@ class FCNN_multi_outputs(GeneralNN):
         # Call to the fit object to train the NN
         history = model.fit(x=[x_train, y_train, 0.5 * y_train],
                             y=[y_train, y_train],
-                            batch_size = self.batchSize, 
-                            epochs = self.maxit, 
+                            batch_size = self.batchsize, 
+                            epochs = self.epochs, 
                             callbacks=[tf.keras.callbacks.EarlyStopping(monitor='loss', patience=self.patience)], 
                             verbose = self.verbosity, 
                             validation_data = ([x_test, y_test, 0.5 * y_test], [y_test, y_test]))
@@ -149,11 +126,11 @@ class FCNN_multi_outputs(GeneralNN):
     def compute_crossval_metrics(self, show_metrics=False):
 
         # The data in different folds
-        split_x = np.array_split(self.x_crossval, self.N_xval_folds, axis=0)
-        split_y = np.array_split(self.y_crossval, self.N_xval_folds, axis=0)
+        split_x = np.array_split(self.x_crossval, self.Nfolds, axis=0)
+        split_y = np.array_split(self.y_crossval, self.Nfolds, axis=0)
 
         mean_se_sum = 0; mean_ae_sum = 0; mean_re_sum = 0; med_re_sum = 0 
-        for i in range(self.N_xval_folds):
+        for i in range(self.Nfolds):
             print("Crossval round # ", i)
             # Construct the data
             x_test = np.array(split_x[i]); y_test = np.array(split_y[i])
@@ -171,7 +148,7 @@ class FCNN_multi_outputs(GeneralNN):
             mean_se_sum += mean_se; mean_ae_sum += mean_ae; mean_re_sum += mean_re; med_re_sum += med_re
 
         # Return the average score
-        return mean_se_sum/self.N_xval_folds, mean_ae_sum/self.N_xval_folds, mean_re_sum/self.N_xval_folds, med_re_sum/self.N_xval_folds
+        return mean_se_sum/self.Nfolds, mean_ae_sum/self.Nfolds, mean_re_sum/self.Nfolds, med_re_sum/self.Nfolds
 
     def compute_metrics(self, y_predict_test, y_test, y_scaler, show_metrics=False):
 
@@ -210,22 +187,11 @@ class FCNN_multi_outputs(GeneralNN):
 '''====================== Class related to FCNN with classification ======================'''
 class FCNN_classification(GeneralNN):
 
-    def __init__(self, inputs, outputs, Ntrain, Nval, Ntest, Nfolds,
-                 learningrate, regularizer, batchsize, epochs, patience, verbosity,
-                 crossval, hyperparam_optimization, lrs, regs, 
-                 inputfile, outputfolder):
+    def __init__(self, learningrate, regularizer, batchsize, epochs, patience, 
+                    verbosity, Nfolds, crossval, outputfolder):
                  
-        GeneralNN.__init__(self, inputs, outputs, Ntrain, Nval, Ntest, Nfolds,
-                 learningrate, regularizer, batchsize, epochs, patience, verbosity,
-                 crossval, hyperparam_optimization, lrs, regs, 
-                 inputfile, outputfolder)
-        self.csv_name = inputfile
-        self.inputs = inputs
-        self.outputs = outputs
-        self.maxit = epochs
-        self.batchSize = batchsize
-        self.patience = patience
-        self.verbosity = verbosity
+        GeneralNN.__init__(self, learningrate, regularizer, batchsize, epochs, patience, 
+                            verbosity, Nfolds, crossval, outputfolder)
 
 
     ''' 
@@ -265,8 +231,8 @@ class FCNN_classification(GeneralNN):
         # Call to the fit object to train the NN
         history = model.fit(x=x_train,
                             y=y_train,
-                            batch_size = self.batchSize, 
-                            epochs = self.maxit, 
+                            batch_size = self.batchsize, 
+                            epochs = self.epochs, 
                             callbacks=[tf.keras.callbacks.EarlyStopping(monitor='loss', patience=self.patience)], 
                             verbose = self.verbosity, 
                             validation_data = (x_test, y_test))
@@ -280,11 +246,11 @@ class FCNN_classification(GeneralNN):
     def compute_crossval_metrics(self, show_metrics=False):
 
         # The data in different folds
-        split_x = np.array_split(self.x_crossval, self.N_xval_folds, axis=0)
-        split_y = np.array_split(self.y_crossval, self.N_xval_folds, axis=0)
+        split_x = np.array_split(self.x_crossval, self.Nfolds, axis=0)
+        split_y = np.array_split(self.y_crossval, self.Nfolds, axis=0)
 
         accuracy_sum = 0; false_pos_sum = 0; false_neg_sum = 0 
-        for i in range(self.N_xval_folds):
+        for i in range(self.Nfolds):
             print("Crossval round # ", i)
             # Construct the data
             x_test = np.array(split_x[i]); y_test = np.array(split_y[i])
@@ -293,16 +259,18 @@ class FCNN_classification(GeneralNN):
 
             # Create and train the NN model for a given fold
             model = self.make_nn(self.reg, self.lr)
-            _, _, _, y_predict_test = self.train_nn(model, x_train, y_train, x_test, y_test, show_conv=False)
+            _, _, _, y_predict_test = self.train_nn(
+                model, x_train, y_train, x_test, y_test, show_conv=False)
 
             # Compute metrics
-            accuracy, false_pos_rate, false_neg_rate = self.compute_metrics(y_predict_test, y_test, show_metrics=show_metrics)
+            accuracy, false_pos_rate, false_neg_rate = self.compute_metrics(
+                y_predict_test, y_test, show_metrics=show_metrics)
 
             # Add the score of this fold
             accuracy_sum += accuracy; false_pos_sum += false_pos_rate; false_neg_sum += false_neg_rate
 
         # Return the average score
-        return accuracy_sum/self.N_xval_folds, false_pos_sum/self.N_xval_folds, false_neg_sum/self.N_xval_folds
+        return accuracy_sum/self.Nfolds, false_pos_sum/self.Nfolds, false_neg_sum/self.Nfolds
 
     def compute_metrics(self, y_predict_test, y_test, show_metrics=False):
 
@@ -313,8 +281,10 @@ class FCNN_classification(GeneralNN):
         # Compute the metrics
 
         accuracy = (np.count_nonzero(y_predict_test == y_test))/y_predict_test.shape[0]
-        false_pos_rate = np.count_nonzero(np.logical_and(y_predict_test != y_test, y_test == np.zeros(y_test.shape)))/y_predict_test.shape[0]
-        false_neg_rate = np.count_nonzero(np.logical_and(y_predict_test != y_test, y_test == np.ones(y_test.shape)))/y_predict_test.shape[0]
+        false_pos_rate = np.count_nonzero(
+            np.logical_and(y_predict_test != y_test, y_test == np.zeros(y_test.shape)))/y_predict_test.shape[0]
+        false_neg_rate = np.count_nonzero(
+            np.logical_and(y_predict_test != y_test, y_test == np.ones(y_test.shape)))/y_predict_test.shape[0]
         
         # Print metrics
         if show_metrics:
