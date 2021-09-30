@@ -34,20 +34,18 @@ from utils import plot_sorted_predictions, plot_regression_results
 def classifier(dataset, outputs, NNtype, show_conv=False, show_metrics=False, savemodel=False):
     
     # Instantiate the neural network
-    NN_classifier = FCNN_classification(learningrate, regularizer, batchsize, epochs, patience, 
-                                        verbosity, Nfolds, crossval, outputfolder)
+    NN_classifier = FCNN_classification(learningrate, regularizer, batchsize, epochs, 
+                                            patience, verbosity, outputfolder)
 
     # Create the neural network
     model = NN_classifier.make_nn(regularizer, learningrate, dataset.x.shape[1], NNtype=NNtype)
 
-    #Train the neural network
+    # Train the neural network
     [y_predict_train, y_predict_test] = NN_classifier.train_nn(
         model, dataset.x_train, dataset.y_class_train, dataset.x_test, dataset.y_class_test, show_conv=show_conv)
 
-    if crossval:
-        acc, fp, fn = NN_classifier.compute_crossval_metrics(show_metrics=show_metrics)
-    else:
-        acc, fp, fn = NN_classifier.compute_metrics(y_predict_test, dataset.y_class_test, show_metrics=show_metrics)
+    # Compute metrics
+    acc, fp, fn = NN_classifier.compute_metrics(y_predict_test, dataset.y_class_test, show_metrics=show_metrics)
 
     if savemodel:
         if os.path.exists('./' + outputfolder) == False:
@@ -71,20 +69,18 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
                 show_conv=False, plot_predictions=True, show_error_bars=False, savefig=False, savemodel=False):
     
     # Instantiate the neural network
-    NN_regressor = FCNN_multi_outputs(learningrate, regularizer, batchsize, epochs, patience, 
-                                        verbosity, Nfolds, crossval, outputfolder)
+    NN_regressor = FCNN_multi_outputs(learningrate, regularizer, batchsize, epochs, 
+                                        patience, verbosity, outputfolder)
     
     # Create the neural network
     model = NN_regressor.make_nn(regularizer, learningrate, dataset.x.shape[1], NNtype=NNtype)
 
-    #Train the neural network
+    # Train the neural network
     [y_predict_train, y_predict_test] = \
         NN_regressor.train_nn(model, x_train, y_train, x_test, y_test, show_conv=show_conv)
 
-    if crossval:
-        mean_se, mean_ae, mean_re, med_re = NN_regressor.compute_crossval_metrics(show_metrics=False)
-    else:
-        mean_se, mean_ae, mean_re, med_re = NN_regressor.compute_metrics(
+    # Compute metrics
+    mean_se, mean_ae, mean_re, med_re = NN_regressor.compute_metrics(
             y_predict_test, y_test, dataset.scaler_y, show_metrics=False)
 
     if savemodel or savefig:
@@ -117,10 +113,7 @@ inputs = ['Diameter', 'Density', 'Strength', 'Velocity',
           'Angle', 'Azimuth', 'Alpha', 'LumEff', 'Ablation']
           
 outputs = ['ThermRad2']
-Ntrain = 2000     
-Nval = 1000
-Ntest = 1000
-Nfolds = 5
+Ntrain = 5000     
 
 # Design of the network and the hyper-parameters
 learningrate = 0.001
@@ -131,12 +124,6 @@ patience = 5
 verbosity = 1
 NNtype = 'shallow'
 
-# Potential extensions
-crossval = False
-hyperparam_optimization = False
-lrs = np.linspace(0.0001, 0.001, 3)
-regs = np.linspace(0, 0.00001, 2)
-
 # Inputs/outputs
 inputfile = 'data-1e4.csv'
 outputfolder = 'results/Ntrain_' + "{:.0e}".format(Ntrain)
@@ -146,7 +133,7 @@ outputfolder = 'results/Ntrain_' + "{:.0e}".format(Ntrain)
 ''' ================ Run the model once to classify and predict ================ '''
 
 # Obtain the data
-dataset = Dataset(inputs, outputs, Ntrain, Nfolds, inputfile)
+dataset = Dataset(inputs, outputs, Ntrain, inputfile)
 dataset.prepare_data()
 
 # Call the classifier
@@ -178,7 +165,7 @@ results = np.zeros((len(output_list), 7 ))
 for n in range(len(output_list)):
       
     # Obtain the data
-    dataset = Dataset(inputs, output_list[n], Ntrain, Nfolds, inputfile)
+    dataset = Dataset(inputs, output_list[n], Ntrain, inputfile)
     dataset.prepare_data()
 
     # Call the classifier
