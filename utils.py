@@ -25,8 +25,8 @@ def save_NN_info(dataset, module, model, outputfolder, outputfile):
         fh.write('\nOTHER PARAMETERS: \n')
         fh.write('Learning rate:                 ' + str(module.lr) + '\n')
         fh.write('Regularizer:                   ' + str(module.reg) + '\n')
-        fh.write('Batch size:                    ' + str(module.batchSize) + '\n')
-        fh.write('Epochs:                        ' + str(module.maxit) + '\n')
+        fh.write('Batch size:                    ' + str(module.batchsize) + '\n')
+        fh.write('Epochs:                        ' + str(module.epochs) + '\n')
         fh.write('Patience:                      ' + str(module.patience) + '\n')
 
     return

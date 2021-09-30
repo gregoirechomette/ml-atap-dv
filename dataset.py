@@ -20,7 +20,7 @@ class Dataset:
         self.inputs = inputs
         self.outputs = outputs
         self.N_train = Ntrain
-        self.N_xval_folds = Nfolds
+        self.Nfolds = Nfolds
         self.N_val = int(0.1 * Ntrain)
         self.N_test = int(0.1 * Ntrain)
         self.csv_name = inputfile
@@ -47,19 +47,19 @@ class Dataset:
         self.x_test = self.x[0:self.N_test, :]
         self.x_val = self.x[self.N_test:self.N_test + self.N_val, :]
         self.x_train = self.x[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train, :]
-        self.x_crossval = self.x[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train + int(self.N_train/self.N_xval_folds), :]
+        self.x_crossval = self.x[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train + int(self.N_train/self.Nfolds), :]
         
         # Split the outputs into test, validation, train, and cross validation sets
         self.y_test = self.y[0:self.N_test, :]
         self.y_val = self.y[self.N_test:self.N_test + self.N_val, :]
         self.y_train = self.y[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train, :]
-        self.y_crossval = self.y[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train + int(self.N_train/self.N_xval_folds), :]
+        self.y_crossval = self.y[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train + int(self.N_train/self.Nfolds), :]
 
         # Split the  categorized into test, validation, train, and cross validation sets
         self.y_class_test = self.y_class[0:self.N_test, :]
         self.y_class_val = self.y_class[self.N_test:self.N_test + self.N_val, :]
         self.y_class_train = self.y_class[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train, :]
-        self.y_class_crossval = self.y_class[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train + int(self.N_train/self.N_xval_folds), :]
+        self.y_class_crossval = self.y_class[self.N_test + self.N_val: self.N_test + self.N_val + self.N_train + int(self.N_train/self.Nfolds), :]
 
         # remember scaler and return it
         self.scaler_y = scaler_y
