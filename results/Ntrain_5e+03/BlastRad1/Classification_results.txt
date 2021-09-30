@@ -1,0 +1,6 @@
+
+CLASSIFICATION RESULTS: 
+ 
+Accuracy:                99.2
+False positive rate:     0.4
+False negative rate:     0.4

@@ -1,0 +1,15 @@
+ 
+NEURAL NETWORK DESIGN: 
+ 
+Model: "model"/n_________________________________________________________________/nLayer (type)                 Output Shape              Param #   /n=================================================================/ninput1 (InputLayer)          [(None, 9)]               0         /n_________________________________________________________________/ndense1 (Dense)               (None, 64)                640       /n_________________________________________________________________/ndense2 (Dense)               (None, 128)               8320      /n_________________________________________________________________/ndense3 (Dense)               (None, 256)               33024     /n_________________________________________________________________/ndense4 (Dense)               (None, 1)                 257       /n=================================================================/nTotal params: 42,241/nTrainable params: 42,241/nNon-trainable params: 0/n_________________________________________________________________/n
+DATA USED: 
+Number of training points:     5000
+Number of test points:         500
+Number of val points:          500
+
+OTHER PARAMETERS: 
+Learning rate:                 0.001
+Regularizer:                   0.0
+Batch size:                    256
+Epochs:                        50
+Patience:                      5
