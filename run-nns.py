@@ -21,7 +21,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 from sklearn import preprocessing
 
 from dataset import Dataset
-from nn_modules import FCNN_classification, FCNN_multi_outputs
+from nn_modules import FCNN_classification, FCNN_with_variance
 
 from utils import save_classification_results, save_regression_results, save_all_results
 from utils import save_NN_info, remove_zero_class
@@ -69,7 +69,7 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
                 show_conv=False, plot_predictions=True, show_error_bars=False, savefig=False, savemodel=False):
     
     # Instantiate the neural network
-    NN_regressor = FCNN_multi_outputs(learningrate, regularizer, batchsize, epochs, 
+    NN_regressor = FCNN_with_variance(learningrate, regularizer, batchsize, epochs, 
                                         patience, verbosity, outputfolder)
     
     # Create the neural network
