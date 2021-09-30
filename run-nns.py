@@ -34,11 +34,9 @@ from utils import plot_sorted_predictions, plot_regression_results
 def classifier(dataset, outputs, NNtype, show_conv=False, show_metrics=False, savemodel=False):
     
     # Instantiate the neural network
-    NN_classifier = FCNN_classification(inputs, outputs, Ntrain, Nval, Ntest, Nfolds, 
-                    learningrate, regularizer, batchsize, epochs, patience, verbosity,
-                    crossval, hyperparam_optimization, lrs, regs, 
-                    inputfile, outputfolder)
-    
+    NN_classifier = FCNN_classification(learningrate, regularizer, batchsize, epochs, patience, 
+                                        verbosity, Nfolds, crossval, outputfolder)
+
     # Create the neural network
     model = NN_classifier.make_nn(regularizer, learningrate, dataset.x.shape[1], NNtype=NNtype)
 
@@ -73,10 +71,8 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
                 show_conv=False, plot_predictions=True, show_error_bars=False, savefig=False, savemodel=False):
     
     # Instantiate the neural network
-    NN_regressor = FCNN_multi_outputs(inputs, outputs, Ntrain, Nval, Ntest, Nfolds, 
-                                      learningrate, regularizer, batchsize, epochs, patience, verbosity,
-                                      crossval, hyperparam_optimization, lrs, regs, 
-                                      inputfile, outputfolder)
+    NN_regressor = FCNN_multi_outputs(learningrate, regularizer, batchsize, epochs, patience, 
+                                        verbosity, Nfolds, crossval, outputfolder)
     
     # Create the neural network
     model = NN_regressor.make_nn(regularizer, learningrate, dataset.x.shape[1], NNtype=NNtype)
@@ -121,7 +117,7 @@ inputs = ['Diameter', 'Density', 'Strength', 'Velocity',
           'Angle', 'Azimuth', 'Alpha', 'LumEff', 'Ablation']
           
 outputs = ['ThermRad2']
-Ntrain = 5000     
+Ntrain = 2000     
 Nval = 1000
 Ntest = 1000
 Nfolds = 5
