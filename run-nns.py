@@ -43,7 +43,7 @@ def classifier(dataset, outputs, NNtype, show_conv=False, show_metrics=False, sa
     model = NN_classifier.make_nn(regularizer, learningrate, dataset.x.shape[1], NNtype=NNtype)
 
     #Train the neural network
-    [J_train, J_test, y_predict_train, y_predict_test] = NN_classifier.train_nn(
+    [y_predict_train, y_predict_test] = NN_classifier.train_nn(
         model, dataset.x_train, dataset.y_class_train, dataset.x_test, dataset.y_class_test, show_conv=show_conv)
 
     if crossval:
@@ -82,7 +82,7 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
     model = NN_regressor.make_nn(regularizer, learningrate, dataset.x.shape[1], NNtype=NNtype)
 
     #Train the neural network
-    [J_train, J_test, y_predict_train, y_predict_test] = \
+    [y_predict_train, y_predict_test] = \
         NN_regressor.train_nn(model, x_train, y_train, x_test, y_test, show_conv=show_conv)
 
     if crossval:
@@ -155,7 +155,7 @@ dataset.prepare_data()
 
 # Call the classifier
 accuracy, fpos, fneg, y_classified_train, y_classified_test = classifier(
-    dataset, outputs, NNtype, show_conv=False, show_metrics=True, savemodel=True)
+    dataset, outputs, NNtype, show_conv=False, show_metrics=True, savemodel=False)
 
 # Update the dataset
 remove_zero_radius = True
@@ -168,7 +168,7 @@ else:
 # Call the regressor
 mean_se, mean_ae, mean_re, med_re = regressor(
     dataset, outputs, NNtype, x_train, y_train, x_test, y_test, 
-    show_conv=False, plot_predictions=True, show_error_bars=True, savefig=True, savemodel=True)
+    show_conv=False, plot_predictions=True, show_error_bars=True, savefig=False, savemodel=False)
 
 
 

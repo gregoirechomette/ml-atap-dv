@@ -144,7 +144,7 @@ class FCNN_multi_outputs(GeneralNN):
         if (show_conv): history_plot(history, self.outputfolder)
 
         # Returns J_train, J_test, y_predict_train, y_predict_test
-        return [history.history['loss'][-1], history.history['val_loss'][-1], model.predict([x_train, y_train, 0.5 * y_train]), model.predict([x_test, y_test, 0.5 * y_test])]
+        return [model.predict([x_train, y_train, 0.5 * y_train]), model.predict([x_test, y_test, 0.5 * y_test])]
 
     def compute_crossval_metrics(self, show_metrics=False):
 
@@ -275,7 +275,7 @@ class FCNN_classification(GeneralNN):
         if (show_conv): history_plot(history, self.outputfolder)
 
         # Returns J_train, J_test, y_predict_train, y_predict_test
-        return [history.history['loss'][-1], history.history['val_loss'][-1], model.predict(x_train), model.predict(x_test)]
+        return [model.predict(x_train), model.predict(x_test)]
 
     def compute_crossval_metrics(self, show_metrics=False):
 
