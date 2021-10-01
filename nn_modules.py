@@ -97,7 +97,7 @@ class FCNN(GeneralNN):
 
     def compute_metrics(self, y_predict_test, y_test, y_scaler, show_metrics=False):
 
-        y_predict_test_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict_test[0]), y_test.shape)[:,0]) + y_scaler.mean_
+        y_predict_test_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict_test[:,0]), y_test.shape)[:,0]) + y_scaler.mean_
         y_true_rescaled = (y_scaler.scale_ * np.array(y_test))[:,0] + y_scaler.mean_
         rel_error = np.divide(np.absolute(y_true_rescaled - y_predict_test_rescaled), 
                           np.array(y_true_rescaled), 
@@ -120,10 +120,10 @@ class FCNN(GeneralNN):
             
         # Print metrics
         if show_metrics:
-            print("Mean squared error = ", mean_se)
-            print("Mean absolute error = ", mean_ae)
-            print("Mean relative error = ", mean_re)
-            print("Median relative error = ", med_re)
+            print("Mean squared error = ", round(mean_se))
+            print("Mean absolute error = ", round(mean_ae))
+            print("Mean relative error = ", round(mean_re * 100, 1),'%')
+            print("Median relative error = ", round(med_re * 100, 1), '%')
 
         return round(mean_se), round(mean_ae), round(mean_re * 100, 1), round(med_re * 100, 1)
 
@@ -224,10 +224,10 @@ class FCNN_with_variance(GeneralNN):
             
         # Print metrics
         if show_metrics:
-            print("Mean squared error = ", mean_se)
-            print("Mean absolute error = ", mean_ae)
-            print("Mean relative error = ", mean_re)
-            print("Median relative error = ", med_re)
+            print("Mean squared error = ", round(mean_se))
+            print("Mean absolute error = ", round(mean_ae))
+            print("Mean relative error = ", round(mean_re * 100, 1),'%')
+            print("Median relative error = ", round(med_re * 100, 1),'%')
 
         return round(mean_se), round(mean_ae), round(mean_re * 100, 1), round(med_re * 100, 1)
 
