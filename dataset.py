@@ -29,11 +29,19 @@ class Dataset:
         data_inputs = pd.read_csv('./data/'+ self.csv_name, usecols=self.inputs)
         data_outputs = pd.read_csv('./data/'+ self.csv_name, usecols=self.outputs)
 
-        # Normalize input and output
+        # Remove the columns with output = 0
+        data_nozero = pd.read_csv('./data/'+ self.csv_name, usecols=self.inputs+self.outputs)
+        data_nozero = data_nozero[data_nozero[self.outputs[0]] > 0]
+
+        # Normalize input and output with zeros
         scaler_x = preprocessing.StandardScaler().fit(data_inputs.iloc[:, :].values)
         self.x = scaler_x.transform(data_inputs.iloc[:, :].values)
         scaler_y = preprocessing.StandardScaler().fit(data_outputs.iloc[:, :].values)
         self.y = scaler_y.transform(data_outputs.iloc[:, :].values)
+
+        # Normalize input and output without zeros
+        self.x_nozero = scaler_x.transform(data_nozero.iloc[:, :-1].values)
+        self.y_nozero = scaler_y.transform(data_nozero.iloc[:, -1:].values)
 
         # Put output in different categories
         data_outputs[self.outputs[0]].mask(data_outputs[self.outputs[0]] > 1, 1, inplace=True)
@@ -59,4 +67,30 @@ class Dataset:
 
         # remember scaler and return it
         self.scaler_y = scaler_y
+        self.scaler_x = scaler_x
         return
+
+    def save_rescaling_params(self, outputfolder, filename):
+
+        with open('./' + outputfolder + '/' + filename, 'w') as fh:
+
+            # First column
+            fh.write('Scaling parameter')
+            for i in range(len(self.inputs)):
+                fh.write(',' + self.inputs[i])
+            fh.write(',' + self.outputs[0])
+            fh.write('\n')
+
+            # Means
+            fh.write('Scaling mean')
+            for i in range(len(self.inputs)):
+                fh.write(',' + str(self.scaler_x.mean_[i]))
+            fh.write(',' + str(self.scaler_y.mean_[0]))
+            fh.write('\n')
+
+            # Standard deviations
+            fh.write('Scaling std')
+            for i in range(len(self.inputs)):
+                fh.write(',' + str(self.scaler_x.scale_[i]))
+            fh.write(',' + str(self.scaler_y.scale_[0]))
+            fh.write('\n')
