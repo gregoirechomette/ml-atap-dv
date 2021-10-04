@@ -21,7 +21,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 from sklearn import preprocessing
 
 from dataset import Dataset
-from nn_modules import FCNN_classification, FCNN_with_variance
+from nn_modules import FCNN, FCNN_classification, FCNN_with_variance
 
 from utils import save_classification_results, save_regression_results, save_all_results
 from utils import save_NN_info, remove_zero_class
@@ -81,7 +81,7 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
 
     # Compute metrics
     mean_se, mean_ae, mean_re, med_re = NN_regressor.compute_metrics(
-            y_predict_test, y_test, dataset.scaler_y, show_metrics=False)
+            y_predict_test, y_test, dataset.scaler_y, show_metrics=True)
 
     if savemodel or savefig:
         if os.path.exists('./' + outputfolder) == False:
@@ -102,6 +102,7 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
         model.save('./' + outputfolder + '/' + outputs[0] + '/Regression_model')
         save_regression_results(mean_se, mean_ae, mean_re, med_re, 
                                 outputfolder + '/' + outputs[0], 'Regression_results.txt')
+        dataset.save_rescaling_params(outputfolder + '/' + outputs[0], 'Scaling_parameters.csv')
 
     return mean_se, mean_ae, mean_re, med_re
 
@@ -185,3 +186,71 @@ for n in range(len(output_list)):
         show_conv=False, plot_predictions=True, show_error_bars=True, savefig=True, savemodel=True)
     
 save_all_results(output_list, results, outputfolder, 'Summary_of_results.csv')
+
+
+
+
+''' =========== Implementation of the inverse design problem =========== '''
+
+def inverse_problem(model_folder, inputs_values, target_value, epochs, learningrate, regularizer, show_conv):
+
+    # Load the model
+    model = models.load_model(model_folder + 'Regression_model')
+
+    # Rescaling coefficients
+    x_scalings = pd.read_csv(model_folder + 'Scaling_parameters.csv')[inputs].to_numpy()
+    y_scalings = pd.read_csv(model_folder + 'Scaling_parameters.csv')[outputs].to_numpy()
+
+    # Create the input, rescale it and convert it to a tensorflow format
+    x_input = np.reshape(np.array(inputs_values),(1,9))
+    x_input = np.divide(np.subtract(x_input, x_scalings[0:1,:]), x_scalings[1:2,:])
+    x_input = tf.Variable(x_input, dtype='float32')
+
+    # Create the output, rescale it and convert it to a tensorflow format
+    y = np.reshape(np.array([target_value]),(1,1))
+    y = np.divide(np.subtract(y, y_scalings[0:1,:]), y_scalings[1:2,:])
+    y = tf.constant(y, shape=(1,), dtype='float32')
+
+    # Instantiate the neural network
+    NN_regressor = FCNN(learningrate, regularizer, batchsize, epochs, 
+                                    patience, verbosity, outputfolder)
+        
+    # Create the neural network
+    new_model = NN_regressor.make_nn_for_inverse(
+        regularizer, learningrate, x_scalings.shape[1], y, model, NNtype=NNtype)
+
+    # Optimization loop
+    for i in range(epochs):
+        with tf.GradientTape() as tape:
+            preds = new_model(x_input)
+        grads = tape.gradient(preds, x_input)
+
+        # Update the input
+        x_input = tf.Variable(tf.math.subtract(x_input, tf.math.scalar_mul(learningrate, grads)))
+
+        # Evaluate the result at this epoch
+        y_out = model.predict(x_input.numpy())[0,0] * y_scalings[1,0] + y_scalings[0,0]
+
+        if show_conv:
+            print("Iteration # ", i, ", the output is: ", y_out)
+
+        # Break if criterion verified
+        if (np.absolute(y_out - target_value) < 100):
+            if show_conv:
+                print("Stopped after ", i ," iterations")
+                
+            break
+
+    return np.multiply(x_input, x_scalings[1:2,:]) + x_scalings[0:1,:], y_out
+
+
+model_folder = './results/Ntrain_2e+03/ThermRad2/'
+inputs_values = [300, 2000, 1e6, 1e4, 45, 0, 0.2, 3e-3, 1e-8]
+target_value = 15000
+
+
+x,y = inverse_problem(
+    model_folder, inputs_values, target_value, epochs=500, learningrate=0.5, regularizer=0, show_conv=True)
+
+print("Result x= ", x)
+print("Result y= ", y)
