@@ -74,6 +74,32 @@ class FCNN(GeneralNN):
 
         return model
 
+    def make_nn_for_inverse(self, lam, lr, input_size, target, saved_model, NNtype='shallow'):
+
+        # Design the architecture
+        inputs = tf.keras.Input((input_size,), name="input1")
+        predictions = layers.Dense(64, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense1")(inputs)
+        predictions = layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense2")(predictions)
+        predictions = layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense3")(predictions)
+
+        if NNtype == 'shallow':
+            predictions = layers.Dense(1, activation='linear', name="dense4")(predictions)
+        elif NNtype == 'deep':
+            predictions = layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense31")(predictions)
+            predictions = layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense32")(predictions)
+            predictions = layers.Dense(64, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense33")(predictions)
+            predictions = layers.Dense(1, activation='linear', name="dense4")(predictions)
+
+        # Calculate the difference between the predictions and target 
+        difference = tf.math.squared_difference(predictions, target)
+
+        # Instantiate the model and assign the weights
+        new_model = tf.keras.Model(inputs=inputs, outputs=difference)
+        new_model.set_weights(saved_model.get_weights()) 
+
+        return new_model
+
+
     '''
         Method to train the NN with gradient descent with labeled data
     '''
