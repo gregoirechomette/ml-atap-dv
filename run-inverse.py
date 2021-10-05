@@ -97,8 +97,8 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
         if show_conv:
             print("Iteration # ", i, ", the output is: ", y_out)
 
-        # Break if criterion verified
-        if (np.absolute(y_out - target_value) < 100):
+        # Break if less than 3% relative error
+        if (np.absolute(y_out - target_value) < 0.05 * target_value):
             if show_conv:
                 print("Stopped after ", i ," iterations")
                 
@@ -108,12 +108,12 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
 
 
 model_folder = './results/Ntrain_2e+03/ThermRad2/'
-inputs_values = [300, 2000, 1e6, 1e4, 45, 0, 0.2, 3e-3, 1e-8]
+inputs_values = [100, 2000, 1e6, 0.2, 1e4, 45, 0.0, 3e-3, 1e-8]
 target_value = 15000
 
 
 x,y = inverse_problem(
-    model_folder, inputs_values, target_value, epochs=500, learningrate=0.5, regularizer=0, show_conv=True)
+    model_folder, inputs_values, target_value, epochs=500, learningrate=0.5, regularizer=0, show_conv=False)
 
 print("Result x= ", x)
 print("Result y= ", y)
