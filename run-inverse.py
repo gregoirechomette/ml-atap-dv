@@ -19,6 +19,7 @@ from tensorflow.keras.layers import Dense, Lambda
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn import preprocessing
+from scipy.stats import loguniform, cosine
 
 from dataset import Dataset
 from nn_modules import FCNN, FCNN_classification, FCNN_with_variance
@@ -52,6 +53,43 @@ inputfile = 'data-1e4.csv'
 outputfolder = 'results/Ntrain_' + "{:.0e}".format(Ntrain)
 
 
+''' =========== Sampling input coefficients from distributions of Mathias et al. (2017) =========== '''
+def inputs_sampling():
+
+    # Diameter (double check the lambda coefficients!)
+    diameter = 1.326e6 *  np.power(10,-0.2 * np.random.uniform(20,30)) / np.sqrt(
+        0.44 * np.random.normal(loc=0.034, scale=0.014) +
+        1.21 * np.random.normal(loc=0.151, scale=0.122)
+        )
+
+    # Density
+    density = 1000 * (1 - np.random.normal(loc=0.34, scale=0.18)) * (
+        0.349 * np.random.normal(loc=3.38, scale=0.19) +
+        0.389 * np.random.normal(loc=3.30, scale=0.12) +
+        0.093 * np.random.normal(loc=3.19, scale=0.14) +
+        0.043 * np.random.normal(loc=2.27, scale=0.13) +
+        0.025 * np.random.normal(loc=6.75, scale=1.84) +
+        0.024 * np.random.normal(loc=7.15, scale=0.57) +
+        0.034 * np.random.normal(loc=2.84, scale=0.13) +
+        0.011 * np.random.normal(loc=3.12, scale=0.19) +
+        0.034 * np.random.normal(loc=2.86, scale=0.11)
+    )
+    # Strength
+    strength = loguniform.rvs(1e5, 1e7)
+    # Alpha
+    alpha = np.random.uniform(0.1,0.3)
+    # Velocity
+    velocity = 1e4 * np.random.gamma(shape=2.0, scale=2.0) # Approximation, not correct
+    # Angle 
+    angle = cosine.rvs(scale=1)
+    # Azimuth
+    azimuth = np.random.uniform(0,360)
+    # LumEff
+    lumeff = loguniform.rvs(3e-4, 3e-2)
+    # Ablation coefficient
+    ablation = loguniform.rvs(3.5e-10, 7e-8)
+
+    return [diameter, density, strength, alpha, velocity, angle, azimuth, lumeff, ablation]
 
 ''' =========== Implementation of the inverse design problem =========== '''
 
@@ -107,6 +145,9 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
     return np.multiply(x_input, x_scalings[1:2,:]) + x_scalings[0:1,:], y_out
 
 
+
+''' ================ Run the model once to classify and predict ================ '''
+
 model_folder = './results/Ntrain_2e+03/ThermRad2/'
 inputs_values = [100, 2000, 1e6, 0.2, 1e4, 45, 0.0, 3e-3, 1e-8]
 target_value = 15000
@@ -117,3 +158,6 @@ x,y = inverse_problem(
 
 print("Result x= ", x)
 print("Result y= ", y)
+
+# input_sampled = inputs_sampling()
+# print(input_sampled)
