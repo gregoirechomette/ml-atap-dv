@@ -28,6 +28,7 @@ from utils import save_classification_results, save_regression_results, save_all
 from utils import save_NN_info, remove_zero_class
 from utils import plot_abs_error, plot_rel_error, plot_rel_distribution
 from utils import plot_sorted_predictions, plot_regression_results
+from utils import plot_inputs_distributions
 
 
 
@@ -90,6 +91,20 @@ def inputs_sampling():
     ablation = loguniform.rvs(3.5e-10, 7e-8)
 
     return [diameter, density, strength, alpha, velocity, angle, azimuth, lumeff, ablation]
+
+
+''' =========== Sampling of multiple input coefficients and ploting of distributions ==========='''
+def sample_and_plot_distributions(N_samples):
+
+    # Initiate the table with first sampling
+    input_samples = np.reshape(inputs_sampling(), (1,9))
+    for i in range(N_samples):
+        input_samples = np.concatenate((input_samples, np.reshape(inputs_sampling(), (1,9))), axis=0)
+
+    plot_inputs_distributions(input_samples)
+
+    return
+
 
 ''' =========== Implementation of the inverse design problem =========== '''
 
@@ -159,5 +174,4 @@ x,y = inverse_problem(
 print("Result x= ", x)
 print("Result y= ", y)
 
-input_sampled = inputs_sampling()
-print(input_sampled)
+sample_and_plot_distributions(10000)
