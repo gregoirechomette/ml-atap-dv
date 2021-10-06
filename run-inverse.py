@@ -57,10 +57,10 @@ outputfolder = 'results/Ntrain_' + "{:.0e}".format(Ntrain)
 def inputs_sampling():
 
     # Diameter (double check the lambda coefficients!)
-    diameter = 1.326e6 *  np.power(10,-0.2 * np.random.uniform(20,30)) / np.sqrt(
+    diameter = 1.326e6 *  np.power(10,-0.2 * np.random.uniform(20,30)) / np.sqrt(1e-8 + np.absolute(
         0.44 * np.random.normal(loc=0.034, scale=0.014) +
         1.21 * np.random.normal(loc=0.151, scale=0.122)
-        )
+        ))
 
     # Density
     density = 1000 * (1 - np.random.normal(loc=0.34, scale=0.18)) * (
@@ -79,9 +79,9 @@ def inputs_sampling():
     # Alpha
     alpha = np.random.uniform(0.1,0.3)
     # Velocity
-    velocity = 1e4 * np.random.gamma(shape=2.0, scale=2.0) # Approximation, not correct
+    velocity = 5e3 * np.random.gamma(shape=9.0, scale=0.5) # Approximation, not correct
     # Angle 
-    angle = cosine.rvs(scale=1)
+    angle = 45 + cosine.rvs(scale=45/np.pi)
     # Azimuth
     azimuth = np.random.uniform(0,360)
     # LumEff
@@ -159,5 +159,5 @@ x,y = inverse_problem(
 print("Result x= ", x)
 print("Result y= ", y)
 
-# input_sampled = inputs_sampling()
-# print(input_sampled)
+input_sampled = inputs_sampling()
+print(input_sampled)
