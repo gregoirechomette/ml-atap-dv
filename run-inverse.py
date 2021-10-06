@@ -151,7 +151,7 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
             print("Iteration # ", i, ", the output is: ", y_out)
 
         # Break if less than 3% relative error
-        if (np.absolute(y_out - target_value) < 0.05 * target_value):
+        if (np.absolute(y_out - target_value) < 0.03 * target_value):
             if show_conv:
                 print("Stopped after ", i ," iterations")
                 
@@ -160,18 +160,49 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
     return np.multiply(x_input, x_scalings[1:2,:]) + x_scalings[0:1,:], y_out
 
 
+''' =========== Implementation of the inverse design problem multiple times =========== '''
 
-''' ================ Run the model once to classify and predict ================ '''
+def multiple_inverse_problems(N_inverse, model_folder, target_value):
 
+    for n in range(N_inverse):
+
+        # Call the inverse function
+        x,y = inverse_problem(
+            model_folder, 
+            inputs_sampling(), 
+            target_value, 
+            epochs=500, 
+            learningrate=0.5, 
+            regularizer=0, 
+            show_conv=False)
+
+        # Print results
+        print("Iteration # ", n, " for inverse problem, output = ", y)
+
+        # Concatenate
+        if n == 0:
+            input_inverse = np.reshape(x,(1,9))
+            output_inverse = np.reshape(y,(1,1))
+        else:
+            input_inverse = np.concatenate((input_inverse, np.reshape(x,(1,9))), axis=0)
+            output_inverse = np.concatenate((output_inverse, np.reshape(y,(1,1))), axis=0)
+
+    res_df = pd.DataFrame(input_inverse, columns=inputs)
+    res_df = res_df.assign(Output=pd.Series(output_inverse.flatten()).values)
+
+    return res_df
+
+
+
+''' ================ Run the inverse problem model ================ '''
+# Target value
+target_value = 1500
+# Saved model to load
 model_folder = './results/Ntrain_2e+03/ThermRad2/'
-inputs_values = [100, 2000, 1e6, 0.2, 1e4, 45, 0.0, 3e-3, 1e-8]
-target_value = 15000
+# Number of inverse problems to solve
+N_inverse = 5
 
+#  Call the function and print the results
+result = multiple_inverse_problems(N_inverse, model_folder, target_value)
+print(result.head())
 
-x,y = inverse_problem(
-    model_folder, inputs_values, target_value, epochs=500, learningrate=0.5, regularizer=0, show_conv=False)
-
-print("Result x= ", x)
-print("Result y= ", y)
-
-sample_and_plot_distributions(10000)
