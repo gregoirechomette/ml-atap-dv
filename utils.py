@@ -335,3 +335,52 @@ def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, me
     return
 
 
+def plot_inputs_distributions(input_samples):
+    
+    plt.subplot(3,3,1)
+    plt.hist(input_samples[:,0], bins=40, density=True, range=(0,800))
+    plt.ylabel('Norm. probability')
+    plt.title('Diameter distribution', fontsize=10)
+
+    plt.subplot(3,3,2)
+    plt.hist(input_samples[:,1], bins=40, density=True)
+    plt.ylabel('Norm. probability')
+    plt.title('Density distribution')
+
+    plt.subplot(3,3,3)
+    plt.hist(np.log10(input_samples[:,2]), bins=40, density=True)
+    plt.ylabel('Norm. probability')
+    plt.title('Strength distribution of log(Strength)')
+
+    plt.subplot(3,3,4)
+    plt.hist(input_samples[:,3], bins=40, density=True)
+    plt.ylabel('Norm. probability')
+    plt.title('Alpha distribution')
+
+    plt.subplot(3,3,5)
+    plt.hist(input_samples[:,4], bins=40, density=True)
+    plt.ylabel('Norm. probability')
+    plt.title('Velocity distribution')
+
+    plt.subplot(3,3,6)
+    plt.hist(input_samples[:,5], bins=40, density=True)
+    plt.ylabel('Norm. probability')
+    plt.title('Angle distribution')
+
+    plt.subplot(3,3,7)
+    plt.hist(input_samples[:,6], bins=40, density=True)
+    plt.ylabel('Norm. probability')
+    plt.title('Azimuth distribution')
+
+    plt.subplot(3,3,8)
+    plt.hist(np.log10(input_samples[:,7]), bins=40, density=True)
+    plt.ylabel('Norm. probability of log(LumEff)')
+    plt.title('Luminous efficiency distribution')
+
+    plt.subplot(3,3,9)
+    plt.hist(np.log10(input_samples[:,8]), bins=40, density=True)
+    plt.ylabel('Norm. probability of log(Ablation)')
+    plt.title('Ablation distribution')
+    plt.show()
+
+    return
