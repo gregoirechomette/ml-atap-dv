@@ -141,7 +141,7 @@ def plot_sorted_predictions(y_predict, y_true, y_scaler, color, dataset, output,
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"prediction_" + dataset + ".png", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"prediction_" + dataset + ".pdf", bbox_inches="tight")
     else: 
         plt.show()
     plt.close()
@@ -171,7 +171,7 @@ def plot_abs_error(y_predict, y_true, y_scaler, color, dataset, output, outputfo
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"abs_error_" + dataset + ".png", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"abs_error_" + dataset + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -205,7 +205,7 @@ def plot_rel_error(y_predict, y_true, y_scaler, color, dataset, output, outputfo
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"rel_error_" + dataset + ".png", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"rel_error_" + dataset + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -237,7 +237,7 @@ def plot_rel_distribution(y_predict, y_true, y_scaler, color, dataset, output, o
     plt.ylabel('Approximate density function')
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"rel_error_distr_" + dataset + ".png", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"rel_error_distr_" + dataset + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -279,7 +279,7 @@ def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, me
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./'+"scalability_accuracies" + ".png", bbox_inches="tight")
+        fig.savefig('./'+"scalability_accuracies" + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -295,7 +295,7 @@ def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, me
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./'+"scalability_abs_err" + ".png", bbox_inches="tight")
+        fig.savefig('./'+"scalability_abs_err" + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -311,7 +311,7 @@ def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, me
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./'+"scalability_mean_rel_err" + ".png", bbox_inches="tight")
+        fig.savefig('./'+"scalability_mean_rel_err" + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -327,7 +327,7 @@ def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, me
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./'+"scalability_median_rel_err" + ".png", bbox_inches="tight")
+        fig.savefig('./'+"scalability_median_rel_err" + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
