@@ -190,6 +190,11 @@ def multiple_inverse_problems(N_inverse, model_folder, target_value):
     res_df = pd.DataFrame(input_inverse, columns=inputs)
     res_df = res_df.assign(Output=pd.Series(output_inverse.flatten()).values)
 
+    columns_names = ['Diameter', 'Density', 'Strength', 'Alpha', 'Velocity', 
+          'Angle', 'Azimuth', 'LumEff', 'Ablation', outputs[0]]
+
+    res_df.columns = (columns_names)
+
     return res_df
 
 
@@ -200,9 +205,9 @@ target_value = 1500
 # Saved model to load
 model_folder = './results/Ntrain_2e+03/ThermRad2/'
 # Number of inverse problems to solve
-N_inverse = 5
+N_inverse = 15
 
 #  Call the function and print the results
 result = multiple_inverse_problems(N_inverse, model_folder, target_value)
-print(result.head())
+print(result.head(15))
 
