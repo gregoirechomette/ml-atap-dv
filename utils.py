@@ -262,7 +262,9 @@ def plot_regression_results(module, y_train, y_predict_train, y_test, y_predict_
 
 def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=False):
 
-    print("Shapes: ", y_true.shape, y_predict.shape)
+    # Keep only 200 elements
+    y_true = y_true[0:200,:]
+    y_predict = y_predict[0:200,:]
 
     y_predict_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict), y_true.shape)[:,0]) + y_scaler.mean_
     y_true_rescaled = (y_scaler.scale_ * np.array(y_true))[:,0] + y_scaler.mean_
@@ -285,17 +287,17 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
     if os.path.exists('./' + outputfolder) == False and savefig == True:
         os.mkdir('./' + outputfolder)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=[6, 5])
     plt.plot(np.arange(len(pred_dict_df_sorted['label'].values)), 
-                pred_dict_df_sorted['label'].values, 'ko', label='PAIR simlutions', markersize=1)
+                0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simlutions', markersize=2)
     plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
-                pred_dict_df_sorted['pred'].values,
-                c=np.log(pred_dict_df_sorted['re'].values), s=1, cmap=plt.cm.viridis, label='ML predictions')
-    plt.colorbar(label="log(rel. error)")
-    plt.title('Predictions on the test set')
+                0.001 * pred_dict_df_sorted['pred'].values,
+                c=np.log(pred_dict_df_sorted['re'].values), s=2, cmap=plt.cm.viridis, label='ML predictions')
+    plt.colorbar(label="log[100 * |y-y*|/y*]")
+    # plt.title('Predictions on the test set')
     plt.legend(loc='upper left')
     plt.xlabel('Configuration number, sorted by increasing output')
-    plt.ylabel(output)
+    plt.ylabel(output + ' [km]')
     plt.draw()
     if savefig:
         plt.show(block=False)
@@ -308,19 +310,19 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
 def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=False):
 
 
-    class_dict = {'label': (y_scaler.scale_ * y_true[:,0]) + y_scaler.mean_,
-                'pred': y_pred[:,0]}
+    # Construct a pandas df with 200 elements
+    class_dict = {'label': (y_scaler.scale_ * y_true[0:200,0]) + y_scaler.mean_,
+                'pred': y_pred[0:200,0]}
 
     class_dict_df = pd.DataFrame(data=class_dict)
     class_dict_df_sorted = class_dict_df.sort_values(by='label')
 
 
-    fig, ax = plt.subplots(figsize=[8, 6])
+    fig, ax = plt.subplots(figsize=[6, 5])
     sp = ax.scatter(np.arange(len(class_dict_df_sorted['label'].values)),
                 0.001 * class_dict_df_sorted['label'].values,
-                c=class_dict_df_sorted['pred'].values, s=1, cmap=plt.cm.viridis)
-    ax.set_xlim(-1, 200)
-    ax.set_ylim(-10, 200)
+                c=class_dict_df_sorted['pred'].values, s=2, cmap=plt.cm.viridis)
+    
     ax.set_xlabel('Configuration number, sorted by increasing output')
     ax.set_ylabel(output + " [km]")
 
@@ -331,14 +333,26 @@ def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=
                 0.001 * class_dict_df_sorted['label'].values,
                 c=class_dict_df_sorted['pred'].values, s=6, cmap=plt.cm.viridis)
 
-    axins.set_xlim(128, 152)
-    axins.set_ylim(-5, 20)
+    # ThermRad2
+    ax.set_xlim(-1, 200)
+    ax.set_ylim(-10, 200)
+    axins.set_xlim(128.5, 151.5)
+    axins.set_ylim(-5, 19)
+
     plt.xticks(visible=False)  
     plt.yticks(visible=False)
     mark_inset(ax, axins, loc1=1, loc2=1, fc="none", ec="0.5")
     mark_inset(ax, axins, loc1=3, loc2=3, fc="none", ec="0.5")
 
+    plt.draw()
+    if savefig:
+        plt.show(block=False)
+        fig.savefig('./' + outputfolder + "/" +"plot_classification" + ".pdf", bbox_inches="tight")
+    else:
+        plt.show()
     plt.show()
+
+
 
 
 def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, median_rel_error, savefig=False):
