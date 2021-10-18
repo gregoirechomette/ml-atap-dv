@@ -12,6 +12,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+
 def save_NN_info(dataset, module, model, outputfolder, outputfile):
     with open('./' + outputfolder + '/' + outputfile, 'w') as fh:
         fh.write(' \nNEURAL NETWORK DESIGN: \n \n')
@@ -268,8 +271,6 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
                           out= 1e-4 + np.zeros_like(np.absolute(y_true_rescaled - y_predict_rescaled)), 
                           where=np.array(y_true_rescaled)!=0)
 
-    print("Shapes: ", y_predict_rescaled.shape, y_true_rescaled.shape, rel_error.shape)
-
 
     pred_dict = {'indices': np.arange(len(y_true_rescaled)),
                 'pred': y_predict_rescaled,
@@ -289,11 +290,8 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
                 pred_dict_df_sorted['label'].values, 'ko', label='PAIR simlutions', markersize=1)
     plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
                 pred_dict_df_sorted['pred'].values,
-                c=np.log(pred_dict_df_sorted['re'].values), s=1, cmap=plt.cm.seismic, label='ML predictions')
+                c=np.log(pred_dict_df_sorted['re'].values), s=1, cmap=plt.cm.viridis, label='ML predictions')
     plt.colorbar(label="log(rel. error)")
-    # plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
-    #             pred_dict_df_sorted['pred'].values, 'o',
-    #             c=pred_dict_df_sorted['re'].values, cmap=plt.cm.autumn, label='ML predictions', markersize=1)
     plt.title('Predictions on the test set')
     plt.legend(loc='upper left')
     plt.xlabel('Configuration number, sorted by increasing output')
@@ -301,10 +299,46 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"prediction_" + dataset + ".pdf", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"prediction_and_re" + ".pdf", bbox_inches="tight")
     else: 
         plt.show()
     plt.close()
+
+
+def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=False):
+
+
+    class_dict = {'label': (y_scaler.scale_ * y_true[:,0]) + y_scaler.mean_,
+                'pred': y_pred[:,0]}
+
+    class_dict_df = pd.DataFrame(data=class_dict)
+    class_dict_df_sorted = class_dict_df.sort_values(by='label')
+
+
+    fig, ax = plt.subplots(figsize=[8, 6])
+    sp = ax.scatter(np.arange(len(class_dict_df_sorted['label'].values)),
+                0.001 * class_dict_df_sorted['label'].values,
+                c=class_dict_df_sorted['pred'].values, s=1, cmap=plt.cm.viridis)
+    ax.set_xlim(-1, 200)
+    ax.set_ylim(-10, 200)
+    ax.set_xlabel('Configuration number, sorted by increasing output')
+    ax.set_ylabel(output + " [km]")
+
+    fig.colorbar(sp, label="Classification probablilty")
+
+    axins = zoomed_inset_axes(ax, 3, loc='upper left') 
+    axins.scatter(np.arange(len(class_dict_df_sorted['label'].values)),
+                0.001 * class_dict_df_sorted['label'].values,
+                c=class_dict_df_sorted['pred'].values, s=6, cmap=plt.cm.viridis)
+
+    axins.set_xlim(128, 152)
+    axins.set_ylim(-5, 20)
+    plt.xticks(visible=False)  
+    plt.yticks(visible=False)
+    mark_inset(ax, axins, loc1=1, loc2=1, fc="none", ec="0.5")
+    mark_inset(ax, axins, loc1=3, loc2=3, fc="none", ec="0.5")
+
+    plt.show()
 
 
 def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, median_rel_error, savefig=False):
