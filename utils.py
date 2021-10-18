@@ -257,11 +257,55 @@ def plot_regression_results(module, y_train, y_predict_train, y_test, y_predict_
 
     return
 
-    plot_scalability(Ntrain_list, classification_accuracies, 
-                              regression_mean_abs_error, 
-                              regression_mean_rel_error,
-                              regression_median_rel_error,
-                              savefig=False)
+def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=False):
+
+    print("Shapes: ", y_true.shape, y_predict.shape)
+
+    y_predict_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict), y_true.shape)[:,0]) + y_scaler.mean_
+    y_true_rescaled = (y_scaler.scale_ * np.array(y_true))[:,0] + y_scaler.mean_
+    rel_error = np.divide(np.absolute(y_true_rescaled - y_predict_rescaled), 
+                          np.array(y_true_rescaled), 
+                          out= 1e-4 + np.zeros_like(np.absolute(y_true_rescaled - y_predict_rescaled)), 
+                          where=np.array(y_true_rescaled)!=0)
+
+    print("Shapes: ", y_predict_rescaled.shape, y_true_rescaled.shape, rel_error.shape)
+
+
+    pred_dict = {'indices': np.arange(len(y_true_rescaled)),
+                'pred': y_predict_rescaled,
+                'label': y_true_rescaled,
+                're': rel_error}
+
+  
+    pred_dict_df = pd.DataFrame(data=pred_dict)
+    pred_dict_df_sorted = pred_dict_df.sort_values(by='label')
+
+
+    if os.path.exists('./' + outputfolder) == False and savefig == True:
+        os.mkdir('./' + outputfolder)
+
+    fig = plt.figure()
+    plt.plot(np.arange(len(pred_dict_df_sorted['label'].values)), 
+                pred_dict_df_sorted['label'].values, 'ko', label='PAIR simlutions', markersize=1)
+    plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
+                pred_dict_df_sorted['pred'].values,
+                c=np.log(pred_dict_df_sorted['re'].values), s=1, cmap=plt.cm.seismic, label='ML predictions')
+    plt.colorbar(label="log(rel. error)")
+    # plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
+    #             pred_dict_df_sorted['pred'].values, 'o',
+    #             c=pred_dict_df_sorted['re'].values, cmap=plt.cm.autumn, label='ML predictions', markersize=1)
+    plt.title('Predictions on the test set')
+    plt.legend(loc='upper left')
+    plt.xlabel('Configuration number, sorted by increasing output')
+    plt.ylabel(output)
+    plt.draw()
+    if savefig:
+        plt.show(block=False)
+        fig.savefig('./' + outputfolder + "/" +"prediction_" + dataset + ".pdf", bbox_inches="tight")
+    else: 
+        plt.show()
+    plt.close()
+
 
 def plot_scalability(Ntrain_list, accuracies, mean_abs_error, mean_rel_error, median_rel_error, savefig=False):
     
