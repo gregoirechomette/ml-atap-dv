@@ -321,17 +321,19 @@ class FCNN_classification(GeneralNN):
 
     def compute_metrics(self, y_predict_test, y_test, show_metrics=False):
 
+        # Introduce a new variable to keep the probabilities
+        y_predict_test_classified = np.array(y_predict_test)
+
         # Transform probabilities into predictions
-        y_predict_test[y_predict_test < 0.5] = 0
-        y_predict_test[y_predict_test >= 0.5] = 1
+        y_predict_test_classified[y_predict_test_classified < 0.5] = 0
+        y_predict_test_classified[y_predict_test_classified >= 0.5] = 1
 
         # Compute the metrics
-
-        accuracy = (np.count_nonzero(y_predict_test == y_test))/y_predict_test.shape[0]
+        accuracy = (np.count_nonzero(y_predict_test_classified == y_test))/y_predict_test_classified.shape[0]
         false_pos_rate = np.count_nonzero(
-            np.logical_and(y_predict_test != y_test, y_test == np.zeros(y_test.shape)))/y_predict_test.shape[0]
+            np.logical_and(y_predict_test_classified != y_test, y_test == np.zeros(y_test.shape)))/y_predict_test_classified.shape[0]
         false_neg_rate = np.count_nonzero(
-            np.logical_and(y_predict_test != y_test, y_test == np.ones(y_test.shape)))/y_predict_test.shape[0]
+            np.logical_and(y_predict_test_classified != y_test, y_test == np.ones(y_test.shape)))/y_predict_test_classified.shape[0]
         
         # Print metrics
         if show_metrics:
