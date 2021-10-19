@@ -293,15 +293,13 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
     plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
                 0.001 * pred_dict_df_sorted['pred'].values,
                 c=np.log(pred_dict_df_sorted['re'].values), s=2, cmap=plt.cm.viridis, label='ML predictions')
-    plt.colorbar(label="log[100 * |y-y*|/y*]")
-    # plt.title('Predictions on the test set')
+    plt.colorbar(label="log[|y-y*|/y*]")
     plt.legend(loc='upper left')
-    plt.xlabel('Configuration number, sorted by increasing output')
     plt.ylabel(output + ' [km]')
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"prediction_and_re" + ".pdf", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"pred_" + output + ".pdf", bbox_inches="tight")
     else: 
         plt.show()
     plt.close()
@@ -323,7 +321,6 @@ def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=
                 0.001 * class_dict_df_sorted['label'].values,
                 c=class_dict_df_sorted['pred'].values, s=2, cmap=plt.cm.viridis)
     
-    ax.set_xlabel('Configuration number, sorted by increasing output')
     ax.set_ylabel(output + " [km]")
 
     fig.colorbar(sp, label="Classification probablilty")
@@ -339,6 +336,12 @@ def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=
     axins.set_xlim(128.5, 151.5)
     axins.set_ylim(-5, 19)
 
+    # BlastRad2
+    ax.set_xlim(-1, 200)
+    ax.set_ylim(-10, 200)
+    axins.set_xlim(103.5, 126.5)
+    axins.set_ylim(-5, 19)
+
     plt.xticks(visible=False)  
     plt.yticks(visible=False)
     mark_inset(ax, axins, loc1=1, loc2=1, fc="none", ec="0.5")
@@ -347,7 +350,7 @@ def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./' + outputfolder + "/" +"plot_classification" + ".pdf", bbox_inches="tight")
+        fig.savefig('./' + outputfolder + "/" +"class_" + output + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.show()
