@@ -10,8 +10,10 @@ import abc
 import h5py
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 
+from mycolorpy import colorlist as mcp
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 
@@ -289,7 +291,7 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
 
     fig = plt.figure(figsize=[6, 5])
     plt.plot(np.arange(len(pred_dict_df_sorted['label'].values)), 
-                0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simlutions', markersize=2)
+                0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simulations', markersize=2)
     plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
                 0.001 * pred_dict_df_sorted['pred'].values,
                 c=np.log(pred_dict_df_sorted['re'].values), s=2, cmap=plt.cm.viridis, label='ML predictions')
@@ -478,4 +480,47 @@ def plot_inputs_distributions(input_samples):
     plt.title('Ablation distribution')
     plt.show()
 
+    return
+
+def plot_probability_threshold(y_true, y_pred, n_intervals, outputfolder, output, savefig=False):
+
+    probs = np.linspace(0.1, 0.9, num=n_intervals)
+
+    accuracies = []
+    false_pos = []
+    false_neg = []
+
+    for p in probs:
+
+        # Introduce a new variable to keep the probabilities
+        y_pred_class = np.array(y_pred)
+
+        # Transform probabilities into predictions
+        y_pred_class[y_pred_class < p] = 0
+        y_pred_class[y_pred_class >= p] = 1
+
+        # Compute the metrics
+        accuracies.append(100 * ((np.count_nonzero(y_pred_class == y_true))/y_pred_class.shape[0]))
+        false_pos.append(100 * (np.count_nonzero(
+            np.logical_and(y_pred_class != y_true, y_true == np.zeros(y_true.shape)))/y_pred_class.shape[0]))
+        false_neg.append(100 * (np.count_nonzero(
+            np.logical_and(y_pred_class != y_true, y_true == np.ones(y_true.shape)))/y_pred_class.shape[0]))
+            
+    fig = plt.figure(figsize=[6, 5])
+    colors=mcp.gen_color(cmap="viridis",n=5)
+
+    plt.plot(probs, 100 - np.array(accuracies), color=colors[1], label='Missclassification rate')
+    plt.plot(probs, false_pos, color=colors[2], label='False positive rate')
+    plt.plot(probs, false_neg, color=colors[3], label='False negative rate')
+    plt.legend()
+    plt.xlabel('Classification probability threshold')
+    plt.ylabel('Percentage')
+    plt.draw()
+    if savefig:
+        plt.show(block=False)
+        fig.savefig('./' + outputfolder + "/" +"probs" + output + ".pdf", bbox_inches="tight")
+    else: 
+        plt.show()
+    plt.close()
+        
     return
