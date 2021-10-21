@@ -505,13 +505,13 @@ def plot_probability_threshold(y_true, y_pred, n_intervals, outputfolder, output
             np.logical_and(y_pred_class != y_true, y_true == np.zeros(y_true.shape)))/y_pred_class.shape[0]))
         false_neg.append(100 * (np.count_nonzero(
             np.logical_and(y_pred_class != y_true, y_true == np.ones(y_true.shape)))/y_pred_class.shape[0]))
-            
+
     fig = plt.figure(figsize=[6, 5])
-    colors=mcp.gen_color(cmap="viridis",n=5)
+    colors=mcp.gen_color(cmap="viridis",n=7)
 
     plt.plot(probs, 100 - np.array(accuracies), color=colors[1], label='Missclassification rate')
-    plt.plot(probs, false_pos, color=colors[2], label='False positive rate')
-    plt.plot(probs, false_neg, color=colors[3], label='False negative rate')
+    plt.plot(probs, false_pos, color=colors[3], label='False positive rate')
+    plt.plot(probs, false_neg, color=colors[5], label='False negative rate')
     plt.legend()
     plt.xlabel('Classification probability threshold')
     plt.ylabel('Percentage')
