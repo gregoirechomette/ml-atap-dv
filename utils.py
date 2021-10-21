@@ -294,7 +294,7 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
                 0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simulations', markersize=2)
     plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
                 0.001 * pred_dict_df_sorted['pred'].values,
-                c=np.log(pred_dict_df_sorted['re'].values), s=2, cmap=plt.cm.viridis, label='ML predictions')
+                c=np.log(pred_dict_df_sorted['re'].values), s=2, cmap=plt.cm.viridis, vmin=-4, vmax=1, label='ML predictions')
     plt.colorbar(label="log[|y-y*|/y*]")
     plt.legend(loc='upper left')
     plt.ylabel(output + ' [km]')
