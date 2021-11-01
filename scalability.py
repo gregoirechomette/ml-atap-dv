@@ -11,19 +11,20 @@ import h5py
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from mycolorpy import colorlist as mcp
 
 def plot_scalability(Ntrains, results, title, savefig=False):
-    
-    colors_linspace = np.linspace(0, 1, 4)
-    colors = [plt.cm.seismic(x) for x in colors_linspace]
 
-    outputs = ['BlastRad1', 'BlastRad2', 'BlastRad4', 'BlastRad10', 
-                'ThermRad2', 'ThermRad3', 'ThermRad4', 'ThermRad6']
+    colors=mcp.gen_color(cmap="viridis",n=9)
+
+    outputs = ['Blast 1', 'Blast 2', 'Blast 4', 'Blast 10', 
+                'Therm 2', 'Therm 3', 'Therm 4', 'Therm 6']
 
     fig = plt.figure()
-    for k, color in enumerate(colors):
-        plt.loglog(Ntrains[:], (results[:,k]), color=color, label=outputs[k])
-    plt.title(title + ' on the test set')
+    plt.loglog(Ntrains[:], (results[:,0]), color=colors[1], label=outputs[0])
+    plt.loglog(Ntrains[:], (results[:,1]), color=colors[3], label=outputs[1])
+    plt.loglog(Ntrains[:], (results[:,2]), color=colors[5], label=outputs[2])
+    plt.loglog(Ntrains[:], (results[:,3]), color=colors[7], label=outputs[3])
     plt.ylabel(title)
     plt.xlabel('Number of training points')
     plt.legend()
@@ -31,16 +32,20 @@ def plot_scalability(Ntrains, results, title, savefig=False):
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./Blast_' + title + ".png", bbox_inches="tight")
+        fig.savefig('./results/scalability/Blast_' + title + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
 
 
     fig = plt.figure()
-    for k, color in enumerate(colors):
-        plt.loglog(Ntrains[:], (results[:,4+k]), color=color, label=outputs[4+k])
-    plt.title(title + ' on the test set')
+    # for k, color in enumerate(colors):
+    plt.loglog(Ntrains[:], (results[:,4]), color=colors[1], label=outputs[4])
+    plt.loglog(Ntrains[:], (results[:,5]), color=colors[3], label=outputs[5])
+    plt.loglog(Ntrains[:], (results[:,6]), color=colors[5], label=outputs[6])
+    plt.loglog(Ntrains[:], (results[:,7]), color=colors[7], label=outputs[7])
+        # plt.loglog(Ntrains[:], (results[:,4+k]), color=color, label=outputs[4+k])
+    # plt.title(title + ' on the test set')
     plt.ylabel(title)
     plt.xlabel('Number of training points')
     plt.legend()
@@ -48,7 +53,7 @@ def plot_scalability(Ntrains, results, title, savefig=False):
     plt.draw()
     if savefig:
         plt.show(block=False)
-        fig.savefig('./Therm_' + title + ".png", bbox_inches="tight")
+        fig.savefig('./results/scalability/Therm_' + title + ".pdf", bbox_inches="tight")
     else:
         plt.show()
     plt.close()
@@ -84,9 +89,10 @@ MEDREs = np.concatenate(
     data_1e5.iloc[:,8:9].values, 
     data_1e6.iloc[:,8:9].values), axis=1).T
 
-# plot_scalability(Ntrain_list, 1 - 0.01 * accuracies, 'Classification_error', savefig=False)
-plot_scalability(Ntrain_list, MAEs, 'MAE', savefig=False)
-plot_scalability(Ntrain_list, 0.01 * MREs, 'MRE', savefig=False)
-plot_scalability(Ntrain_list, 0.01 * MEDREs, 'MedRE', savefig=False)
+if os.path.exists('./results/scalability') == False:
+    os.mkdir('./results/scalability')
 
-# print(accuracies)
+# plot_scalability(Ntrain_list, 1 - 0.01 * accuracies, 'Missclassification rate', savefig=False)
+plot_scalability(Ntrain_list, 0.001 * MAEs, 'Mean absolute error [km]', savefig=True)
+# plot_scalability(Ntrain_list, 0.01 * MREs, 'MRE', savefig=False)
+# plot_scalability(Ntrain_list, 0.01 * MEDREs, 'MedRE', savefig=False)
