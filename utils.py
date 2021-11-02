@@ -289,16 +289,31 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
     if os.path.exists('./' + outputfolder) == False and savefig == True:
         os.mkdir('./' + outputfolder)
 
-    fig = plt.figure(figsize=[6, 5])
-    # plt.plot(np.arange(len(pred_dict_df_sorted['label'].values)), 
-                # 0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simulations', markersize=2)
-    plt.scatter(0.001 * pred_dict_df_sorted['pred'].values,
+    fig, ax = plt.subplots(figsize=[6, 5])
+    sp = ax.scatter(0.001 * pred_dict_df_sorted['pred'].values,
                 0.001 * pred_dict_df_sorted['label'].values,
                 c=100*pred_dict_df_sorted['re'].values, s=3, cmap=plt.cm.viridis, vmin=0, vmax=50)
-    plt.colorbar(label="Relative error (%)")
-    # plt.legend(loc='upper left')
-    plt.xlabel(output[:-4] + ' ' + output[-1:] + ' (ML) [km]')
-    plt.ylabel(output[:-4] + ' ' + output[-1:] + ' (PAIR) [km]')
+
+    
+    ax.set_xlabel(output[:-4] + ' ' + output[-1:] + ' (ML) [km]')
+    ax.set_ylabel(output[:-4] + ' ' + output[-1:] + ' (PAIR) [km]')
+    fig.colorbar(sp, label="Relative error (%)")
+
+    axins = zoomed_inset_axes(ax, 3, loc='upper left') 
+    axins.scatter(0.001 * pred_dict_df_sorted['pred'].values,
+                0.001 * pred_dict_df_sorted['label'].values,
+                c=100*pred_dict_df_sorted['re'].values, s=6, cmap=plt.cm.viridis, vmin=0, vmax=50)
+
+    # ax.set_xlim(-1, 20)
+    # ax.set_ylim(-1, 20)
+    axins.set_xlim(-1, 45)
+    axins.set_ylim(-1, 45)
+    
+    plt.xticks(visible=False)  
+    plt.yticks(visible=False)
+    mark_inset(ax, axins, loc1=4, loc2=4, fc="none", ec="0.5")
+    mark_inset(ax, axins, loc1=3, loc2=3, fc="none", ec="0.5")
+
     plt.draw()
     if savefig:
         plt.show(block=False)
