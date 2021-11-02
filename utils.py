@@ -265,8 +265,8 @@ def plot_regression_results(module, y_train, y_predict_train, y_test, y_predict_
 def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=False):
 
     # Keep only 200 elements
-    y_true = y_true[0:200,:]
-    y_predict = y_predict[0:200,:]
+    y_true = y_true[0:500,:]
+    y_predict = y_predict[0:500,:]
 
     y_predict_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict), y_true.shape)[:,0]) + y_scaler.mean_
     y_true_rescaled = (y_scaler.scale_ * np.array(y_true))[:,0] + y_scaler.mean_
@@ -290,14 +290,15 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
         os.mkdir('./' + outputfolder)
 
     fig = plt.figure(figsize=[6, 5])
-    plt.plot(np.arange(len(pred_dict_df_sorted['label'].values)), 
-                0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simulations', markersize=2)
-    plt.scatter(np.arange(len(pred_dict_df_sorted['pred'].values)),
-                0.001 * pred_dict_df_sorted['pred'].values,
-                c=100*pred_dict_df_sorted['re'].values, s=2, cmap=plt.cm.viridis, vmin=0, vmax=50, label='ML predictions')
+    # plt.plot(np.arange(len(pred_dict_df_sorted['label'].values)), 
+                # 0.001 * pred_dict_df_sorted['label'].values, 'ko', label='PAIR simulations', markersize=2)
+    plt.scatter(0.001 * pred_dict_df_sorted['pred'].values,
+                0.001 * pred_dict_df_sorted['label'].values,
+                c=100*pred_dict_df_sorted['re'].values, s=3, cmap=plt.cm.viridis, vmin=0, vmax=50)
     plt.colorbar(label="Relative error (%)")
-    plt.legend(loc='upper left')
-    plt.ylabel(output + ' [km]')
+    # plt.legend(loc='upper left')
+    plt.xlabel(output[:-4] + ' ' + output[-1:] + ' (ML) [km]')
+    plt.ylabel(output[:-4] + ' ' + output[-1:] + ' (PAIR) [km]')
     plt.draw()
     if savefig:
         plt.show(block=False)
