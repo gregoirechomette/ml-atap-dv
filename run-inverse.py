@@ -106,6 +106,30 @@ def sample_and_plot_distributions(N_samples):
     return
 
 
+''' =========== Update of input with consideration of bounds =========== '''
+def update_inputs(x_input, x_scalings, grads, learningrate):
+
+    # Order is: D, rho, S, alpha, V, angle, azimuth, eta, sigma
+    lower_bounds = [0, 8e2, 1e5, 0.1, 5e3, 0, 0, 3e-4, 3.5e-10]
+    upper_bounds = [2e3, 1e4, 1e7, 0.3, 5e4, 90, 360, 3e-2, 7e-8]
+
+    # Convert input to numpy format
+    x_input = x_input.numpy()
+    gradients = grads.numpy()
+
+    # After gradient descent
+    x_modified = np.multiply(x_input - learningrate * gradients, x_scalings[1:2,:]) + x_scalings[0:1,:]
+
+    # Loop over all gradients and check that solutions are in acceptable range
+    for i in range(x_input.shape[1]):
+        if((lower_bounds[i] < x_modified[0,i]) and (x_modified[0,i] < upper_bounds[i])):
+            x_input [0,i] -= learningrate * gradients[0,i]
+    
+    x_input = tf.Variable(x_input)
+
+    return x_input
+
+
 ''' =========== Implementation of the inverse design problem =========== '''
 
 def inverse_problem(model_folder, inputs_values, target_value, epochs, learningrate, regularizer, show_conv):
@@ -142,7 +166,7 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
         grads = tape.gradient(preds, x_input)
 
         # Update the input
-        x_input = tf.Variable(tf.math.subtract(x_input, tf.math.scalar_mul(learningrate, grads)))
+        x_input = update_inputs(x_input, x_scalings, grads, learningrate)
 
         # Evaluate the result at this epoch
         y_out = model.predict(x_input.numpy())[0,0] * y_scalings[1,0] + y_scalings[0,0]
@@ -156,6 +180,11 @@ def inverse_problem(model_folder, inputs_values, target_value, epochs, learningr
                 print("Stopped after ", i ," iterations")
                 
             break
+
+        if i == epochs - 1:
+            y_out = 0
+            if show_conv:
+                print("Did not converge")
 
     return np.multiply(x_input, x_scalings[1:2,:]) + x_scalings[0:1,:], y_out
 
@@ -205,9 +234,9 @@ target_value = 1500
 # Saved model to load
 model_folder = './results/Ntrain_2e+03/ThermRad2/'
 # Number of inverse problems to solve
-N_inverse = 15
+N_inverse = 25
 
 #  Call the function and print the results
 result = multiple_inverse_problems(N_inverse, model_folder, target_value)
-print(result.head(15))
+print(result.head(25))
 
