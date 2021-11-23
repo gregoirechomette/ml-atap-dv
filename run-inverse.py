@@ -6,8 +6,11 @@ import os
 import sys
 import abc
 
+from pandas.io.parsers import read_csv
+
 # Standard python libraries
 import h5py
+import subprocess
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -227,16 +230,53 @@ def multiple_inverse_problems(N_inverse, model_folder, target_value):
     return res_df
 
 
+''' =========== Validate solution w/ PAIR =========== '''
+
+def validate_solution(N_inverse, result_np, pair_folder):
+    
+    # Create input file
+    file_name= 'scenarios.in.txt'
+    os.system('rm ' + file_name)
+    f = open(file_name, 'a+')
+    for scenario in range(N_inverse):
+        f.write('NAS' + '\t' + '1' + '\t' + str(result_np[scenario, 0]) 
+                + '\t' + '0' + '\t' + '0' + '\t' + 'S' + '\t' 
+                + str(result_np[scenario, 1]) + '\t' + str(result_np[scenario, 2]) + '\t' 
+                + str(result_np[scenario, 3]) + '\t' + str(result_np[scenario, 4]) + '\t' 
+                + str(result_np[scenario, 5]) + '\t' + str(result_np[scenario, 6]) + '\t' 
+                + '37.421' + '\t' + '-122.065' + '\t' 
+                + str(result_np[scenario, 7]) + '\t' + str(result_np[scenario, 8]) + '\t' 
+                + '0' + '\n')
+    f.close()
+
+    # Run PAIR
+    os.system('cp ' + file_name + ' ' + pair_folder)
+    os.chdir(pair_folder)
+    os.system('rm output-pair.txt')
+    with open('output-pair.txt', 'a+') as output_f:
+        p = subprocess.Popen('./risk',
+        stdout = output_f,
+        stderr = output_f)
+    p.wait()
+    
+    return pd.read_csv('output-pair.txt', usecols=[' ThermRad2 ']).to_numpy()
+
+
 
 ''' ================ Run the inverse problem model ================ '''
 # Target value
 target_value = 1500
-# Saved model to load
-model_folder = './results/Ntrain_2e+03/ThermRad2/'
 # Number of inverse problems to solve
-N_inverse = 25
+N_inverse = 3
 
-#  Call the function and print the results
-result = multiple_inverse_problems(N_inverse, model_folder, target_value)
-print(result.head(25))
+# Model and PAIR folder paths
+model_folder = './results/Ntrain_2e+03/ThermRad2/'
+pair_folder = '/Users/gchomett/Documents/Professional/NASA/PAIR-dv/PAIR-r68-laptop/PAIR-CodeFiles/'
 
+# Find solutions of the inverse problem
+result_df = multiple_inverse_problems(N_inverse, model_folder, target_value)
+result_np = result_df.to_numpy()
+
+# Verify the solutions w/ PAIR
+val = validate_solution(N_inverse, result_np, pair_folder)
+print(val)
