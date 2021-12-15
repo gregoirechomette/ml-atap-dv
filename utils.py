@@ -299,6 +299,51 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
     ax.set_ylabel(output[:-4] + ' ' + output[-1:] + ' (PAIR) [km]')
     fig.colorbar(sp, label="Relative error (%)")
 
+    plt.draw()
+    if savefig:
+        plt.show(block=False)
+        fig.savefig('./' + outputfolder + "/" +"pred_" + output + ".pdf", bbox_inches="tight")
+    else: 
+        plt.show()
+    plt.close()
+    
+def plot_pred_and_re_zoom(y_true, y_predict, y_scaler, output, outputfolder, savefig=False):
+    
+    # Keep only 200 elements
+    y_true = y_true[0:500,:]
+    y_predict = y_predict[0:500,:]
+
+    y_predict_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict), y_true.shape)[:,0]) + y_scaler.mean_
+    y_true_rescaled = (y_scaler.scale_ * np.array(y_true))[:,0] + y_scaler.mean_
+    rel_error = np.divide(np.absolute(y_true_rescaled - y_predict_rescaled), 
+                          np.array(y_true_rescaled), 
+                          out= 1e-4 + np.zeros_like(np.absolute(y_true_rescaled - y_predict_rescaled)), 
+                          where=np.array(y_true_rescaled)!=0)
+
+
+    pred_dict = {'indices': np.arange(len(y_true_rescaled)),
+                'pred': y_predict_rescaled,
+                'label': y_true_rescaled,
+                're': rel_error}
+
+  
+    pred_dict_df = pd.DataFrame(data=pred_dict)
+    pred_dict_df_sorted = pred_dict_df.sort_values(by='label')
+
+
+    if os.path.exists('./' + outputfolder) == False and savefig == True:
+        os.mkdir('./' + outputfolder)
+
+    fig, ax = plt.subplots(figsize=[6, 5])
+    sp = ax.scatter(0.001 * pred_dict_df_sorted['pred'].values,
+                0.001 * pred_dict_df_sorted['label'].values,
+                c=100*pred_dict_df_sorted['re'].values, s=3, cmap=plt.cm.viridis, vmin=0, vmax=50)
+
+    
+    ax.set_xlabel(output[:-4] + ' ' + output[-1:] + ' (ML) [km]')
+    ax.set_ylabel(output[:-4] + ' ' + output[-1:] + ' (PAIR) [km]')
+    fig.colorbar(sp, label="Relative error (%)")
+
     axins = zoomed_inset_axes(ax, 3, loc='upper left') 
     axins.scatter(0.001 * pred_dict_df_sorted['pred'].values,
                 0.001 * pred_dict_df_sorted['label'].values,
@@ -331,22 +376,34 @@ def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=
                 'pred': y_pred[0:200,0]}
 
     class_dict_df = pd.DataFrame(data=class_dict)
-    class_dict_df_sorted = class_dict_df.sort_values(by='label')
+    
 
+    class_dict_zero = class_dict_df[class_dict_df['label'] < 1e-3]
+    class_dict_nonzero = class_dict_df[class_dict_df['label'] >= 1e-3]
+
+    class_dict_zero_sorted = class_dict_zero.sort_values(by='pred')
+    class_dict_nonzero_sorted = class_dict_nonzero.sort_values(by='label')
+
+    labels = np.concatenate((class_dict_zero_sorted['label'], class_dict_nonzero_sorted['label']), axis=0)
+    preds = np.concatenate((class_dict_zero_sorted['pred'], class_dict_nonzero_sorted['pred']), axis=0)
 
     fig, ax = plt.subplots(figsize=[6, 5])
-    sp = ax.scatter(np.arange(len(class_dict_df_sorted['label'].values)),
-                0.001 * class_dict_df_sorted['label'].values,
-                c=class_dict_df_sorted['pred'].values, s=2, cmap=plt.cm.viridis)
+    sp = ax.scatter(np.arange(len(labels)),
+                0.001 * labels,
+                c=preds, s=3, cmap=plt.cm.viridis)
+
     
-    ax.set_ylabel(output + " [km]")
+    
+    ax.set_ylabel(output[:-4] + ' ' + output[-1:] + ' (PAIR) [km]')
+    ax.set_xticklabels([])
+    ax.set_xticks([])
 
     fig.colorbar(sp, label="Classification probablilty")
 
     axins = zoomed_inset_axes(ax, 3, loc='upper left') 
-    axins.scatter(np.arange(len(class_dict_df_sorted['label'].values)),
-                0.001 * class_dict_df_sorted['label'].values,
-                c=class_dict_df_sorted['pred'].values, s=6, cmap=plt.cm.viridis)
+    axins.scatter(np.arange(len(labels)),
+                0.001 * labels,
+                c=preds, s=8, cmap=plt.cm.viridis)
 
     # ThermRad2
     ax.set_xlim(-1, 200)
@@ -354,11 +411,11 @@ def plot_classification(y_true, y_pred, y_scaler, output, outputfolder, savefig=
     axins.set_xlim(128.5, 151.5)
     axins.set_ylim(-5, 19)
 
-    # BlastRad2
-    ax.set_xlim(-1, 200)
-    ax.set_ylim(-10, 200)
-    axins.set_xlim(103.5, 126.5)
-    axins.set_ylim(-5, 19)
+    # # BlastRad2
+    # ax.set_xlim(-1, 200)
+    # ax.set_ylim(-10, 200)
+    # axins.set_xlim(103.5, 126.5)
+    # axins.set_ylim(-5, 19)
 
     plt.xticks(visible=False)  
     plt.yticks(visible=False)
