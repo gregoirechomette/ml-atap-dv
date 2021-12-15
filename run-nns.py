@@ -23,10 +23,10 @@ from sklearn import preprocessing
 from dataset import Dataset
 from nn_modules import FCNN, FCNN_classification, FCNN_with_variance
 
-from utils import save_classification_results, save_regression_results, save_all_results
+from utils import plot_pred_and_re_zoom, save_classification_results, save_regression_results, save_all_results
 from utils import save_NN_info, remove_zero_class
 from utils import plot_abs_error, plot_rel_error, plot_rel_distribution
-from utils import plot_sorted_predictions, plot_regression_results, plot_pred_and_re, plot_classification, plot_probability_threshold
+from utils import plot_sorted_predictions, plot_regression_results, plot_pred_and_re, plot_classification, plot_probability_threshold, plot_pred_and_re_zoom
 
 
 """  ================ Function used for the full classification task ================ """
@@ -96,7 +96,7 @@ def regressor_wo_variance(dataset, outputs, NNtype, x_train, y_train, x_test, y_
 
     # Save the plots
     if plot_predictions:
-        plot_pred_and_re(y_test, y_predict_test, dataset.scaler_y,
+        plot_pred_and_re_zoom(y_test, y_predict_test, dataset.scaler_y,
         outputs[0], outputfolder + '/' + outputs[0], savefig)
 
     # Save the model architecture, the weights, and the results
@@ -161,7 +161,7 @@ inputs = ['Diameter', 'Density', 'Strength', 'Velocity',
           'Angle', 'Azimuth', 'Alpha', 'LumEff', 'Ablation']
           
 outputs = ['ThermRad2']
-Ntrain = 10000  
+Ntrain = 5000
 
 # Design of the network and the hyper-parameters
 learningrate = 0.001
@@ -173,7 +173,7 @@ verbosity = 1
 NNtype = 'shallow'
 
 # Inputs/outputs
-inputfile = 'data-1e6.csv'
+inputfile = './data-scenarios/data-1e4.csv'
 outputfolder = 'results/Ntrain_paper_plot' + "{:.0e}".format(Ntrain)
 
 
@@ -252,7 +252,7 @@ x_train, y_train, x_test, y_test = remove_zero_class(
 # Call the regressor
 mean_se, mean_ae, mean_re, med_re = regressor_wo_variance(
     dataset, outputs, NNtype, x_train, y_train, x_test, y_test, 
-    show_conv=False, plot_predictions=True, show_error_bars=True, savefig=True, savemodel=False)
+    show_conv=False, plot_predictions=True, show_error_bars=True, savefig=False, savemodel=False)
 
 
 
