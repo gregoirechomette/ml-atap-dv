@@ -26,11 +26,11 @@ class Dataset:
 
     def prepare_data(self):
         # Retrieve the data
-        data_inputs = pd.read_csv('./data/'+ self.csv_name, usecols=self.inputs)
-        data_outputs = pd.read_csv('./data/'+ self.csv_name, usecols=self.outputs)
+        data_inputs = pd.read_csv(self.csv_name, usecols=self.inputs)
+        data_outputs = pd.read_csv(self.csv_name, usecols=self.outputs)
 
         # Remove the columns with output = 0
-        data_nozero = pd.read_csv('./data/'+ self.csv_name, usecols=self.inputs+self.outputs)
+        data_nozero = pd.read_csv(self.csv_name, usecols=self.inputs+self.outputs)
         data_nozero = data_nozero[data_nozero[self.outputs[0]] > 0]
 
         # Normalize input and output with zeros
