@@ -25,13 +25,21 @@ class Dataset:
         self.csv_name = inputfile
 
     def prepare_data(self):
+        
         # Retrieve the data
-        data_inputs = pd.read_csv(self.csv_name, usecols=self.inputs)
-        data_outputs = pd.read_csv(self.csv_name, usecols=self.outputs)
+        data = pd.read_csv(self.csv_name, usecols=self.inputs+self.outputs)
+        
+        # Shuffle the data (if needed)
+        shuffle_data = True
+        if shuffle_data == True:
+            data = data.sample(frac=1)
+            
+        # Create the inputs and outputs
+        data_inputs = data[self.inputs].copy()
+        data_outputs = data[self.outputs].copy()
 
         # Remove the columns with output = 0
-        data_nozero = pd.read_csv(self.csv_name, usecols=self.inputs+self.outputs)
-        data_nozero = data_nozero[data_nozero[self.outputs[0]] > 0]
+        data_nozero = data[data[self.outputs[0]] > 0]
 
         # Normalize input and output with zeros
         scaler_x = preprocessing.StandardScaler().fit(data_inputs.iloc[:, :].values)
