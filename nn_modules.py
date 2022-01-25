@@ -73,6 +73,34 @@ class FCNN(GeneralNN):
                 metrics=['mae'])
 
         return model
+    
+    def make_nn_for_hpc(self, lam, lr, input_size, hvd):
+    
+        # Design the architecture
+        inputs = tf.keras.Input((input_size,), name="input1")
+        predictions = layers.Dense(64, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense1")(inputs)
+        predictions = layers.Dense(128, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense2")(predictions)
+        predictions = layers.Dense(256, activation='relu', kernel_regularizer=regularizers.l2(lam), name="dense3")(predictions)
+        predictions = layers.Dense(1, activation='linear', name="dense4")(predictions)
+        
+        # Get the number of workers
+        size = hvd.size()
+        
+        # Instantiate the model with labels given as input
+        model = tf.keras.Model(inputs=inputs, outputs=predictions)
+        
+        # Instantiate optimizer
+        opt = tf.keras.optimizers.Adam(learning_rate=lr * size)
+        
+        # Wrap Keras optimizer into Horovod to make it a distributed optimizer
+        opt = hvd.DistributedOptimizer(opt)
+
+        # Compile the model
+        model.compile(optimizer=opt,
+                loss=tf.keras.losses.MeanSquaredError(),
+                metrics=['mae'])
+
+        return model
 
     def make_nn_for_inverse(self, lam, lr, input_size, target, saved_model, NNtype='shallow'):
 
