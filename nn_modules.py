@@ -11,13 +11,14 @@ import h5py
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 # ML libraries
 import tensorflow as tf
 from tensorflow.keras import Model, Input, regularizers, layers, models
 from tensorflow.keras.layers import Dense, Lambda
 from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 
 
 '''====================== Parent class, for all types of neural networks ======================'''
@@ -127,7 +128,6 @@ class FCNN(GeneralNN):
 
         return new_model
 
-
     '''
         Method to train the NN with gradient descent with labeled data
     '''
@@ -141,6 +141,27 @@ class FCNN(GeneralNN):
                             callbacks=[tf.keras.callbacks.EarlyStopping(monitor='loss', patience=self.patience)], 
                             verbose = self.verbosity, 
                             validation_data = (x_test, y_test))
+
+        # print the history of the convergence
+        if (show_conv): history_plot(history, self.outputfolder)
+
+        # Returns y_predict_train, y_predict_test
+        return [model.predict(x_train), model.predict(x_test)]
+
+    '''
+        Method to train the NN with gradient descent with labeled data on a distributed system
+    '''
+    def train_nn_for_hpc(self, model, x_train, y_train, x_test, y_test, hvd, show_conv=False):
+        
+        # Call to the fit object to train the NN
+        history = model.fit(x = x_train,
+                            y = y_train,
+                            steps_per_epoch = (x_train.shape[0] // self.batchsize ) // hvd.size(),
+                            epochs = self.epochs, 
+                            callbacks = [tf.keras.callbacks.EarlyStopping(monitor='loss', patience=self.patience)], 
+                            verbose = self.verbosity if hvd.rank() == 0 else 0, 
+                            validation_data = (x_test, y_test),
+                            validation_steps = (x_test.shape[0] // self.batchsize ) // hvd.size())
 
         # print the history of the convergence
         if (show_conv): history_plot(history, self.outputfolder)
