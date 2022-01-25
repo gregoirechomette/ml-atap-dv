@@ -307,6 +307,53 @@ def plot_pred_and_re(y_true, y_predict, y_scaler, output, outputfolder, savefig=
         plt.show()
     plt.close()
     
+    
+def plot_pred_and_re_populations(y_true, y_predict, y_scaler, output, outputfolder, savefig=False):
+    
+    # Keep only 200 elements
+    y_true = y_true[0:500,:]
+    y_predict = y_predict[0:500,:]
+
+    y_predict_rescaled = (y_scaler.scale_ * np.reshape(np.array(y_predict), y_true.shape)[:,0]) + y_scaler.mean_
+    y_true_rescaled = (y_scaler.scale_ * np.array(y_true))[:,0] + y_scaler.mean_
+    rel_error = np.divide(np.absolute(y_true_rescaled - y_predict_rescaled), 
+                          np.array(y_true_rescaled), 
+                          out= 1e-4 + np.zeros_like(np.absolute(y_true_rescaled - y_predict_rescaled)), 
+                          where=np.array(y_true_rescaled)!=0)
+
+
+    pred_dict = {'indices': np.arange(len(y_true_rescaled)),
+                'pred': y_predict_rescaled,
+                'label': y_true_rescaled,
+                're': rel_error}
+
+  
+    pred_dict_df = pd.DataFrame(data=pred_dict)
+    pred_dict_df_sorted = pred_dict_df.sort_values(by='label')
+
+
+    if os.path.exists('./' + outputfolder) == False and savefig == True:
+        os.mkdir('./' + outputfolder)
+
+    fig, ax = plt.subplots(figsize=[6, 5])
+    sp = ax.scatter(0.001 * pred_dict_df_sorted['pred'].values,
+                0.001 * pred_dict_df_sorted['label'].values,
+                c=100*pred_dict_df_sorted['re'].values, s=3, cmap=plt.cm.viridis, vmin=0, vmax=50)
+
+    
+    ax.set_xlabel('Number of people (ML) [km]')
+    ax.set_ylabel('Number of people (Ground truth) [km]')
+    fig.colorbar(sp, label="Relative error (%)")
+
+    plt.draw()
+    if savefig:
+        plt.show(block=False)
+        fig.savefig('./' + outputfolder + "/" +"pred_" + output + ".pdf", bbox_inches="tight")
+    else: 
+        plt.show()
+    plt.close()
+    
+    
 def plot_pred_and_re_zoom(y_true, y_predict, y_scaler, output, outputfolder, savefig=False):
     
     # Keep only 200 elements
