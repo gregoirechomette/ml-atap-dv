@@ -1,7 +1,0 @@
-
-REGRESSION RESULTS: 
- 
-Mean squared error:      273990668
-Mean absolute error:     8684
-Mean relative error:     33.8
-Median relative error:   11.8
