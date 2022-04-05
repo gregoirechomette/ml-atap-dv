@@ -160,8 +160,8 @@ def regressor(dataset, outputs, NNtype, x_train, y_train, x_test, y_test,
 inputs = ['Diameter', 'Density', 'Strength', 'Velocity', 
           'Angle', 'Azimuth', 'Alpha', 'LumEff', 'Ablation']
           
-outputs = ['ThermRad2']
-Ntrain = 5000
+outputs = ['BlastRad1']
+Ntrain = 15000
 
 # Design of the network and the hyper-parameters
 learningrate = 0.001
@@ -173,7 +173,7 @@ verbosity = 1
 NNtype = 'shallow'
 
 # Inputs/outputs
-inputfile = './data-scenarios/data-1e4.csv'
+inputfile = './data-scenarios/data-1e6.csv'
 outputfolder = 'results/Ntrain_paper_plot' + "{:.0e}".format(Ntrain)
 
 
