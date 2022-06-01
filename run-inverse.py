@@ -252,14 +252,14 @@ def validate_solution(N_inverse, result_np, pair_folder):
     # Run PAIR
     os.system('cp ' + file_name + ' ' + pair_folder)
     os.chdir(pair_folder)
-    os.system('rm output-pair.txt')
-    with open('output-pair.txt', 'a+') as output_f:
+    os.system('rm output-pair.csv')
+    with open('output-pair.csv', 'a+') as output_f:
         p = subprocess.Popen('./risk',
         stdout = output_f,
         stderr = output_f)
     p.wait()
     
-    return pd.read_csv('output-pair.txt', usecols=[' ThermRad2 ']).to_numpy()
+    return pd.read_csv('output-pair.csv', usecols=[' ThermRad2 ']).to_numpy()
 
 
 
@@ -273,10 +273,18 @@ N_inverse = 3
 model_folder = './results/Ntrain_2e+03/ThermRad2/'
 pair_folder = '/Users/gchomett/Documents/Professional/NASA/PAIR-dv/PAIR-r68-laptop/PAIR-CodeFiles/'
 
-# Find solutions of the inverse problem
-result_df = multiple_inverse_problems(N_inverse, model_folder, target_value)
-result_np = result_df.to_numpy()
+# # Find solutions of the inverse problem
+# result_df = multiple_inverse_problems(N_inverse, model_folder, target_value)
+# result_np = result_df.to_numpy()
 
-# Verify the solutions w/ PAIR
-val = validate_solution(N_inverse, result_np, pair_folder)
+# print(result_np)
+
+# Test purpose
+test_np = np.array([[40.31, 3264.95, 386300, 0.1555, 15908, 49.93, 105.6, 0.02291, 1.79e-8, 1500],
+                    [161.02, 2221.46, 5357000, 0.1284, 15456, 53.52, 80.84, 0.002974, 1.84e-8, 1500],
+                    [156.96, 2468.12, 138800, 0.2932, 15637, 38.75, 121.39, 0.008511, 1.32e-8, 1500]])
+
+# # Verify the solutions w/ PAIR
+# val = validate_solution(N_inverse, result_np, pair_folder)
+val = validate_solution(N_inverse, test_np, pair_folder)
 print(val)
