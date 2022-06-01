@@ -10,6 +10,7 @@ import abc
 import h5py
 import numpy as np
 import pandas as pd
+import shap
 import matplotlib.pyplot as plt
 
 # ML libraries
@@ -28,6 +29,8 @@ from utils import save_NN_info, remove_zero_class
 from utils import plot_abs_error, plot_rel_error, plot_rel_distribution
 from utils import plot_sorted_predictions, plot_regression_results, plot_pred_and_re, plot_classification, plot_probability_threshold, plot_pred_and_re_zoom
 
+from warnings import simplefilter
+simplefilter(action='ignore', category=FutureWarning)
 
 """  ================ Function used for the full classification task ================ """
 
@@ -98,6 +101,16 @@ def regressor_wo_variance(dataset, outputs, NNtype, x_train, y_train, x_test, y_
     if plot_predictions:
         plot_pred_and_re_zoom(y_test, y_predict_test, dataset.scaler_y,
         outputs[0], outputfolder + '/' + outputs[0], savefig)
+        
+    # Shap analysis
+    X100 = shap.utils.sample(x_train, 100)
+    explainer = shap.KernelExplainer(model.predict,X100);
+    shap_values = explainer.shap_values(X100,nsamples=100);
+    shap.summary_plot(shap_values[0],X100,feature_names=['Diameter', 'Density', 'Strength', 'Alpha', 'Velocity', 
+          'Angle', 'Azimuth', 'LumEff', 'Ablation'])
+    
+    shap.summary_plot(shap_values,X100,feature_names=['Diameter', 'Density', 'Strength', 'Alpha', 'Velocity', 
+          'Angle', 'Azimuth', 'LumEff', 'Ablation'])
 
     # Save the model architecture, the weights, and the results
     if savemodel:
